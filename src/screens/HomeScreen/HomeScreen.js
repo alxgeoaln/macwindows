@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, TextInput, Image, TouchableOpacity, Animated, ScrollView, FlatList } from 'react-native';
 import { colors } from '../../constants';
 
 import { styles } from './HomeScreen.styles';
@@ -8,10 +8,41 @@ const background = require('../../../assets/images/background.jpeg');
 
 export const HomeScreen = ({ navigation }) => {
 
+    const [posts, usePosts] = useState([]);
+
+    useEffect(() => {
+        fetch('https://jsonplaceholder.typicode.com/posts?userId=1')
+            .then((response) => response.json())
+            .then((json) => usePosts(json));
+    }, [])
+
+    const bgAnimValue = useRef(new Animated.Value(0)).current;
+
+    const bgColor = bgAnimValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [colors.darkGreen, 'red']
+    })
+
     const handleMyProfileNavigationPress = () => navigation.push('Profile');
 
+    const handleChangeBackground = (value) => () => {
+        Animated.spring(bgAnimValue, {
+            toValue: value,
+            useNativeDriver: false
+        }).start()
+    }
+
+    const renderItem = ({ item }) => (
+        <View style={styles.postContainer}>
+            <Text style={styles.postTitle}>{item.title}</Text>
+            <Text>{item.body}</Text>
+        </View>
+    )
+
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, {
+            backgroundColor: bgColor
+        }]}>
             <View style={styles.sidebar}>
                 <View style={styles.profile}>
                     <Image style={styles.profileBackgroundImage} source={background} />
@@ -46,16 +77,16 @@ export const HomeScreen = ({ navigation }) => {
                         />
                         <View style={styles.postButtons}>
                             <TouchableOpacity
-                                style={[styles.postButton, {marginLeft: 0}]}
-                                onPress={() => console.log('hello')}
+                                style={[styles.postButton, { marginLeft: 0 }]}
+                                onPress={handleChangeBackground(1)}
                             >
-                                <Text style={styles.postButtonText}>Photo</Text>
+                                <Text style={styles.postButtonText}>red bg</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.postButton}
-                                onPress={() => console.log('hello')}
+                                onPress={handleChangeBackground(0)}
                             >
-                                <Text style={styles.postButtonText}>Video</Text>
+                                <Text style={styles.postButtonText}>green bg</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.postButton}
@@ -72,8 +103,13 @@ export const HomeScreen = ({ navigation }) => {
                         </View>
                     </View>
                 </View>
+                <FlatList
+                    renderItem={renderItem}
+                    data={posts}
+                    keyExtractor={item => item.id}
+                />
             </View>
-        </View>
+        </Animated.View>
     )
 }
 

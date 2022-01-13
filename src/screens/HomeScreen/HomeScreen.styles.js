@@ -129,6 +129,17 @@ export const styles = StyleSheet.create({
         color: colors.lightGreen,
         fontWeight: 'bold',
         fontSize: 14,
-        
+    },
+    postContainer: {
+        borderRadius: 10,
+        backgroundColor: colors.lightGreen,
+        marginBottom: 10,
+        marginHorizontal: 5,
+        padding: 10
+    },
+    postTitle: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        marginBottom: 5
     }
 })
